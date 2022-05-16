@@ -1,0 +1,24 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/adam/GitRepo/misc/dns-relay'
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/args.c -o lib/args.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/db_parse.c -o lib/db_parse.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/db_type.c -o lib/db_type.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/dns_parse.c -o lib/dns_parse.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/log.c -o lib/log.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/main.c -o lib/main.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/messages.c -o lib/messages.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mCC \e[0m";
+gcc -c src/server.c -o lib/server.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\e[0;33mLD \e[0m";
+gcc -o bin/binary lib/args.o lib/db_parse.o lib/db_type.o lib/dns_parse.o lib/log.o lib/main.o lib/messages.o lib/server.o -g3 -DDEBUG=1 -O3 -std=gnu99  -fstack-protector-all -Wstack-protector -Wall -Wextra -pedantic  
+echo -en "\n--\nBinary file placed at" \
+		  "\e[0;33mbin/binary\e[0m\n";
+make: Leaving directory '/home/adam/GitRepo/misc/dns-relay'
+ 
