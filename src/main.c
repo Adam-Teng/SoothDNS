@@ -5,10 +5,9 @@
  *
  *    Description:  Main file of the project
  *
- *        Created:  03/24/2016 19:40:56
+ *        Created:  05/15/2022
  *
- *         Author:  Gustavo Pantuza
- *   Organization:  Software Community
+ *         Author:  yhteng
  *
  * ============================================================================
  */
@@ -43,9 +42,11 @@ int main(int argc, char *argv[]) {
   log_info("dns relay started");
 
   /* Print basic information */
-  log_info("remote server: %s, max query: %d, max udp req: %d, client port: %d, hosts file: %s",
-           para->server_addr, para->max_query, para->max_udp_req, para->client_port,
-           para->hosts_paths);
+  log_info("remote server: %s",para->server_addr);
+  log_info("max query: %d", para->max_query);
+  log_info("max udp req: %d", para->max_udp_req);
+  log_info("client port: %d", para->client_port);
+  log_info("hosts file: %s", para->hosts_paths);
 
   return EXIT_SUCCESS;
 }
