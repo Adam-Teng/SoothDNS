@@ -14,18 +14,19 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <stdlib.h>
+#include <uv.h>
+
 #include "args.h"
 #include "db_cache.h"
 #include "db_parse.h"
 #include "db_tree.h"
-#include <stdlib.h>
-#include <uv.h>
 
-extern uv_loop_t *loop;
-extern tree_t *db_tree;
-extern cache_t *db_cache;
+extern uv_loop_t* loop;
+extern tree_t* db_tree;
+extern cache_t* db_cache;
 
-void server_init(parameter_t *para);
+void server_init(parameter_t* para);
 
 int server_run();
 
