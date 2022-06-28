@@ -1,4 +1,4 @@
-#include "db_type.h"
+#include "type.h"
 #include <stdlib.h>
 
 void destroy_name(db_name_t *p) {

@@ -1,4 +1,4 @@
-#include "db_tree.h"
+#include "tree.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

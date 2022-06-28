@@ -1,14 +1,3 @@
-#
-#
-#
-# Makefile template for C code
-#
-# Author: Gustavo Pantuza Coelho Pinto
-# Since: 24.03.2016
-#
-#
-#
-
 
 # Includes the project configurations
 include project.conf
@@ -52,6 +41,7 @@ BINDIR := bin
 SRCDIR := src
 UTILS := src/utils
 SERVER := src/dns-server
+DB := src/database
 LOGDIR := log
 LIBDIR := lib
 TESTDIR := test
@@ -94,7 +84,7 @@ TEST_BINARY := $(BINARY)_test_runner
 
 
 # %.o file names
-NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT))))
+NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT))))
 OBJECTS :=$(patsubst %,$(LIBDIR)/%.o,$(NAMES))
 
 
@@ -146,6 +136,10 @@ $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
+
+$(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
 	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
 

@@ -22,10 +22,10 @@
 
 /* include here your files that contain test functions */
 
-#include "db_parse.c"
-#include "db_parse.h"
-#include "db_type.c"
-#include "db_type.h"
+#include "database/parse.c"
+#include "database/parse.h"
+#include "database/type.c"
+#include "database/type.h"
 
 /* A test case that does nothing and succeeds. */
 static void null_test_success(void **state) {

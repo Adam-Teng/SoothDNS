@@ -1,7 +1,7 @@
 #ifndef DB_CACHE_H
 #define DB_CACHE_H
 
-#include "db_type.h"
+#include "type.h"
 
 #define DB_CACHE_INDEX_WIDTH 0x10
 #define DB_CACHE_ENTRY_NUM (0X1 << DB_CACHE_INDEX_WIDTH)
