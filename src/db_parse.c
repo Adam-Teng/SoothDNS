@@ -167,6 +167,7 @@ int db_parse_next_record(char **str, char *end, db_record_t *res) {
   return DB_PARSE_RECORD_OKAY;
 }
 
+/*
 db_record_t *db_io(char *path, int *count, int *ret_code) {
   FILE *handle;
   size_t file_len;
@@ -203,3 +204,4 @@ db_record_t *db_io(char *path, int *count, int *ret_code) {
   *ret_code = code;
   return rec;
 }
+*/

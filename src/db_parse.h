@@ -32,6 +32,6 @@ db_name_t *db_parse_name(char *str, uint16_t len, int *ret_code);
 db_ip_t db_parse_ip(const char *str, uint16_t len, int *ret_code);
 int db_parse_next_record(char **p, char *end, db_record_t *res);
 
-db_record_t *db_io(char *path, int *count, int *ret_code);
+// db_record_t *db_io(char *path, int *count, int *ret_code);
 
 #endif // !DB_PARSE_H
