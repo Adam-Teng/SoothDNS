@@ -68,11 +68,15 @@ int main(int argc, char *argv[]) {
   /* prints parser's state */
   ap_print(parser);
 
-  /* init server
+  /* init server */
   loop_init();
   log_info("libuv event loop initialized");
+  socket_init();
+  log_info("udp socket initialized");
   log_info("server initialized, listening at port 53");
-  */
+
+  /* run server */
+  server_run();
 
   /* Free the parser's memory */
   ap_free(parser);
