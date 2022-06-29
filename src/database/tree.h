@@ -2,7 +2,6 @@
 #define DB_TREE_H
 
 #include "parse.h"
-#include "type.h"
 #include <stdlib.h>
 
 struct tree_node_s {

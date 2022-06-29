@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-db_record_t *db_io(char *path, int *count, int *ret_code) {
+db_record_t *readfile(char *path, int *count, int *ret_code) {
   FILE *handle;
   size_t file_len;
   char *buf;

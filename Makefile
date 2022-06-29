@@ -41,6 +41,8 @@ BINDIR := bin
 SRCDIR := src
 UTILS := src/utils
 SERVER := src/dns-server
+CLIENT := src/dns-client
+POOL := src/dns-client/pools
 DB := src/database
 LOGDIR := log
 LIBDIR := lib
@@ -137,7 +139,7 @@ $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB)
 
 $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
