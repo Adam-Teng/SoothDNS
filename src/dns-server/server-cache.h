@@ -15,9 +15,9 @@
 #ifndef DNS_SERVER_CACHE_H
 #define DNS_SERVER_CACHE_H
 
-#include "database/cache.h"
-#include "database/tree.h"
-#include "utils/args.h"
+#include "args.h"
+#include "cache.h"
+#include "tree.h"
 
 extern tree_t *db_tree;
 extern cache_t *db_cache;

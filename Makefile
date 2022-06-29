@@ -137,11 +137,11 @@ $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
 
 $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
 
 # Rule for run valgrind tool
 valgrind:

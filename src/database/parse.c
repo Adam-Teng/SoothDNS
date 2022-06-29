@@ -12,8 +12,8 @@
  * ============================================================================
  */
 #include "parse.h"
+#include "log.h"
 #include "type.h"
-#include "utils/log.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

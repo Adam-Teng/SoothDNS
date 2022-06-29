@@ -1,6 +1,6 @@
 #include "io.h"
+#include "log.h"
 #include "parse.h"
-#include "utils/log.h"
 #include <stdio.h>
 #include <stdlib.h>
 

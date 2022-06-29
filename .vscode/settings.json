@@ -1,0 +1,7 @@
+{
+  "clangd.fallbackFlags": [
+    "-I${workspaceFolder}", // 项目根目录
+    "-I${workspaceFolder}/src/utils",
+    "-I${workspaceFolder}/src/database",
+  ]
+}

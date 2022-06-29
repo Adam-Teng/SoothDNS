@@ -1,5 +1,5 @@
 #include "server.h"
-#include "utils/log.h"
+#include "log.h"
 
 #include <netinet/in.h>
 #include <uv.h>

@@ -13,11 +13,11 @@
  */
 
 #include "server-cache.h"
-#include "database/cache.h"
-#include "database/io.h"
-#include "database/tree.h"
-#include "database/type.h"
-#include "utils/log.h"
+#include "cache.h"
+#include "io.h"
+#include "log.h"
+#include "tree.h"
+#include "type.h"
 
 tree_t *db_tree = 0;
 cache_t *db_cache = 0;
