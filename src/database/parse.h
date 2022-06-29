@@ -1,16 +1,3 @@
-/*
- * ============================================================================
- *
- *       Filename:  db_parse.h
- *
- *    Description:  header file for db_parse.c
- *
- *        Created:  05/14/2022
- *
- *         Author:  yhteng
- *
- * ============================================================================
- */
 #ifndef DB_PARSE_H
 #define DB_PARSE_H
 

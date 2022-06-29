@@ -86,7 +86,7 @@ TEST_BINARY := $(BINARY)_test_runner
 
 
 # %.o file names
-NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT))))
+NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT) $(POOL)/*.$(SRCEXT) $(CLIENT)/*.$(SRCEXT))))
 OBJECTS :=$(patsubst %,$(LIBDIR)/%.o,$(NAMES))
 
 
@@ -144,6 +144,14 @@ $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
 	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
+
+$(LIBDIR)/%.o: $(POOL)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
+
+$(LIBDIR)/%.o: $(CLIENT)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(POOL)
 
 # Rule for run valgrind tool
 valgrind:

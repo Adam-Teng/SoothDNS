@@ -3,5 +3,7 @@
     "-I${workspaceFolder}", // 项目根目录
     "-I${workspaceFolder}/src/utils",
     "-I${workspaceFolder}/src/database",
+    "-I${workspaceFolder}/src/dns-client",
+    "-I${workspaceFolder}/src/dns-client/pools",
   ]
 }
