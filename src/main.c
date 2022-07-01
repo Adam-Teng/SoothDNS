@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dns-client/client.h"
 #include "dns-server/server.h"
 #include "utils/args.h"
 #include "utils/log.h"
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
   /* init server */
   loop_init();
   log_info("libuv event loop initialized");
+  pools_init(para);
+  log_info("pools initialized");
   socket_init();
   log_info("udp socket initialized");
   log_info("server initialized, listening at port 53");

@@ -5,8 +5,8 @@ qpool_t *qpool_init(size_t pool_size) {
   pool->pool_size = pool_size;
   pool->pool = malloc(sizeof(query_t) * pool_size);
   sc_queue_init(&pool->queue);
-  for (int i = 0; i < pool_size; i++) {
-    sc_queue_add_last(&pool->queue, 2);
+  for (size_t i = 0; i < pool_size; i++) {
+    sc_queue_add_last(&pool->queue, i);
   }
 
   return pool;
@@ -30,7 +30,8 @@ int qpool_insert(qpool_t *pool, struct sockaddr addr, char *msg,
 void qpool_remove(qpool_t *pool, size_t idx) {
   int test = 0;
   for (size_t i = 0; i < sc_queue_size(&pool->queue); i++) {
-    test = idx == sc_queue_at(&pool->queue, i);
+    int id = (int)idx;
+    test = id == sc_queue_at(&pool->queue, i);
   }
   assert(test);
   if (pool->pool[idx].msg) {

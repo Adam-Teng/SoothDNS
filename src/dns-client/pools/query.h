@@ -17,6 +17,9 @@ typedef struct {
   size_t pool_size;
   struct sc_queue_int queue;
 } qpool_t;
+
+qpool_t *qpool_init(size_t pool_size);
+
 int qpool_full(qpool_t *pool);
 
 int qpool_insert(qpool_t *pool, struct sockaddr addr, char *msg,
