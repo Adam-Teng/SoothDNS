@@ -131,7 +131,7 @@ all: $(OBJECTS)
 # Rule for object binaries compilation
 $(LIBDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(CLIENT)
 
 $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
@@ -139,7 +139,7 @@ $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB) -I $(CLIENT)
 
 $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
@@ -151,7 +151,7 @@ $(LIBDIR)/%.o: $(POOL)/%.$(SRCEXT)
 
 $(LIBDIR)/%.o: $(CLIENT)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(POOL)
 
 # Rule for run valgrind tool
 valgrind:

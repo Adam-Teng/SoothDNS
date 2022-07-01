@@ -71,24 +71,62 @@ static void on_cli_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
   }
 }
 
-static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
-                        const struct sockaddr *addr, unsigned flags) {
-  uv_udp_send_t *req;
-  uv_buf_t sndbuf;
-  char ipaddr[17] = {0};
-  uv_ip4_name(&addr, ipaddr, sizeof(ipaddr));
-  if (nread <= 0) {
-    printf("[ERROR] Detected %s trans error or null trans, len :%zd !\n",
-           ipaddr, nread);
+static void add_udp_req(struct sockaddr addr, char *req_data, size_t req_len) {
+  // check whether pool is full
+  if (qpool_full(qpool)) {
+    log_warn("ignore dns request due to full query pool.");
     return;
   }
-  printf("[INFO] receive message from %s\n", ipaddr, buf->base);
-  printf("%zd\n", nread);
-  for (int i = 0; i < nread; i += 4) {
-    printf("0x%02x ", ((int *)buf->base)[i / 4]);
+  if (upool_full(upool)) {
+    log_warn("ignore dns request due to full udp req pool.");
+    return;
   }
-  fflush(stdout);
-  return;
+  int q_id = qpool_insert(qpool, addr, req_data, req_len);
+  // get udp context id
+  int u_id = upool_add(upool, q_id, qpool->pool + q_id);
+
+  uv_udp_send_t *send_req = malloc(sizeof(uv_udp_send_t));
+  uv_buf_t send_buf =
+      uv_buf_init(upool->pool[u_id]->send_buf, upool->pool[u_id]->send_len);
+  uv_udp_send(send_req, cli_sock, &send_buf, 1, &remote_addr, on_send);
+}
+
+static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
+                        const struct sockaddr *addr, unsigned flags) {
+  if (nread < 0) {
+    printf("recv error: %s\n", uv_err_name(nread));
+    uv_close((uv_handle_t *)handle, NULL);
+    free(buf->base);
+    return;
+  }
+
+  if (nread > 0) {
+    char sender[17] = {0};
+    uint16_t port = ntohs(*(uint16_t *)addr->sa_data);
+    uv_ip4_name((const struct sockaddr_in *)addr, sender, 16);
+    log_info("recv client request from %s:%d, length %ld", sender, port, nread);
+
+    dns_msg_t parsed_msg;
+    int ret_code = parse_dns_msg(buf->base, &parsed_msg);
+    memcpy(parsed_msg.raw, buf->base, nread);
+    if (ret_code != DNS_MSG_PARSE_OK) {
+      log_error("Error parsing dns message");
+    }
+    log_info("DNS message id %d, qcount %d", parsed_msg.header.id,
+             parsed_msg.header.qd_cnt);
+    printf("          ");
+    print_question(parsed_msg.question, parsed_msg.raw);
+    printf("\n");
+
+    int hit = 0;
+    // relay to dns server
+    if (!hit) {
+      log_info("request handler: raw server");
+      add_udp_req(*addr, buf->base, nread);
+    }
+
+    free(buf->base);
+  }
 }
 
 void loop_init() { loop = uv_default_loop(); }

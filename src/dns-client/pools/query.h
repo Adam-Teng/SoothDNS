@@ -1,7 +1,7 @@
 #ifndef QUERY_H
 #define QUERY_H
 
-#include "dns_parse.h"
+#include "../dns_parse.h"
 #include "queue.h"
 #include <sys/socket.h>
 

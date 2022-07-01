@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
   log_info("libuv event loop initialized");
   pools_init(para);
   log_info("pools initialized");
-  socket_init();
+  socket_init(para);
   log_info("udp socket initialized");
   log_info("server initialized, listening at port 53");
 

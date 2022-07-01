@@ -37,12 +37,6 @@ int upool_add(udp_pool_t *pool, int q_id, query_t *q) {
 }
 
 void upool_finish(udp_pool_t *pool, int u_id) {
-  int test = 0;
-  for (size_t i = 0; i < sc_queue_size(&pool->queue); i++) {
-    int id = (int)u_id;
-    test = id == sc_queue_at(&pool->queue, i);
-  }
-  assert(test);
   sc_queue_add_last(&pool->queue, u_id);
   pool->pool[u_id]->valid = 0;
 }
