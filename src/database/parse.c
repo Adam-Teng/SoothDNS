@@ -1,32 +1,10 @@
-/*
- * ============================================================================
- *
- *       Filename:  db_parse.c
- *
- *    Description:  我现在不知道
- *
- *        Created:  05/14/2022
- *
- *         Author:  yhteng
- *
- * ============================================================================
- */
-#include "db_parse.h"
-#include "db_type.h"
+#include "parse.h"
+#include "log.h"
+#include "type.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define loge(args...)                                                          \
-  fprintf(stderr, "[   error ] ");                                             \
-  fprintf(stderr, args);                                                       \
-  fprintf(stdout, "\n")
-
-void error(const char *msg) {
-  fprintf(stderr, "%s\n", msg);
-  exit(-1);
-}
 
 db_ip_t _parse_ip(const char *str, uint16_t len, int *ret_code, db_ip_t access,
                   int depth);
@@ -174,40 +152,4 @@ int db_parse_next_record(char **str, char *end, db_record_t *res) {
   }
   *str = a;
   return DB_PARSE_RECORD_OKAY;
-}
-
-db_record_t *db_io(char *path, int *count, int *ret_code) {
-  FILE *handle;
-  size_t file_len;
-  char *buf;
-  handle = fopen(path, "rb");
-  if (!handle) {
-    loge("cannot open hosts file\n");
-    error("db cache init error");
-  }
-  fseek(handle, 0, SEEK_END);
-  file_len = ftell(handle);
-
-  buf = malloc(file_len * sizeof(char));
-  rewind(handle);
-  fread(buf, file_len, 1, handle);
-
-  char *p = buf;
-  char *end = p + file_len;
-  db_record_t *rec = malloc(DB_PARSE_MAX_RECORD * sizeof(db_record_t));
-  *count = 0;
-  int code = DB_PARSE_RECORD_OKAY;
-  while (code != DB_PARSE_RECORD_OKAY) {
-    code = db_parse_next_record(&p, end, rec + *count);
-    if (code == DB_PARSE_RECORD_INVALID) {
-      *ret_code = code;
-      free(rec);
-      return 0;
-    }
-    *count += 1;
-  }
-  *count += 1;
-
-  *ret_code = code;
-  return rec;
 }

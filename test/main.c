@@ -14,40 +14,34 @@
  * ============================================================================
  */
 
-
+#include <cmocka.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
 #include <string.h>
-
 
 /* include here your files that contain test functions */
 
-#include "../src/db_type.h"
-#include "../src/db_type.c"
-#include "../src/db_parse.h"
-#include "../src/db_parse.c"
-
-
+#include "database/parse.c"
+#include "database/parse.h"
+#include "database/type.c"
+#include "database/type.h"
 
 /* A test case that does nothing and succeeds. */
 static void null_test_success(void **state) {
 
-    /**
-     * If you want to know how to use cmocka, please refer to:
-     * https://api.cmocka.org/group__cmocka__asserts.html
-     */
-    (void) state; /* unused */
+  /**
+   * If you want to know how to use cmocka, please refer to:
+   * https://api.cmocka.org/group__cmocka__asserts.html
+   */
+  (void)state; /* unused */
 }
-
 
 /**
  * Test runner function
  */
 
-static void test_destroy_name_null_returnnull()
-{
+static void test_destroy_name_null_returnnull() {
   db_name_t *p = 0;
   destroy_name(p);
   assert_null(p);
@@ -55,9 +49,9 @@ static void test_destroy_name_null_returnnull()
 
 static void test_db_parse_name_correct1() {
   int code = -1;
-  db_name_t *name = db_parse_name("www.google.com", 14,  &code);
+  db_name_t *name = db_parse_name("www.google.com", 14, &code);
   db_name_t *p = name;
-  
+
   assert_non_null(p);
   assert_string_equal("com", p->label.label);
   assert_int_equal(3, p->label.len);
@@ -78,7 +72,7 @@ static void test_db_parse_name_correct1() {
 
 static void test_db_parse_name_correct_2() {
   int code = -1;
-  db_name_t *name = db_parse_name("www.GOOGLE.c0m", 14,  &code);
+  db_name_t *name = db_parse_name("www.GOOGLE.c0m", 14, &code);
   db_name_t *p = name;
 
   assert_non_null(p);
@@ -102,7 +96,7 @@ static void test_db_parse_name_correct_2() {
 
 static void test_db_parse_name_null() {
   int code = -1;
-  db_name_t *name = db_parse_name("", 0,  &code);
+  db_name_t *name = db_parse_name("", 0, &code);
 
   assert_null(name);
   assert_int_equal(code, DB_PARSE_NAME_OKAY);
@@ -110,12 +104,12 @@ static void test_db_parse_name_null() {
 
 static void test_db_parse_name_invalid() {
   int code = -1;
-  db_name_t *name = db_parse_name("..", 2,  &code);
+  db_name_t *name = db_parse_name("..", 2, &code);
 
   assert_null(name);
   assert_int_equal(code, DB_PARSE_NAME_INVALID);
 
-  name = db_parse_name("google.", 7,  &code);
+  name = db_parse_name("google.", 7, &code);
   assert_null(name);
   assert_int_equal(code, DB_PARSE_NAME_INVALID);
 }
@@ -149,7 +143,7 @@ static void test_db_parse_ip_correct() {
 
 static void test_db_parse_ip_invalid_end() {
   int code = -1;
-  
+
   char a[] = "0.0.0.";
   db_ip_t ip = db_parse_ip(a, strlen(a), &code);
   assert_int_equal(code, DB_PARSE_IP_INVALID);
@@ -169,7 +163,7 @@ static void test_db_parse_ip_invalid_notdigit() {
   int code2 = -1;
   int code3 = -1;
   int code4 = -1;
-  
+
   char a[] = "0.0.0.1a";
   db_ip_t ip = db_parse_ip(a, strlen(a), &code1);
   assert_int_equal(code1, DB_PARSE_IP_INVALID);
@@ -219,8 +213,9 @@ static void test_db_parse_next_record_1() {
 
   char sn[] = "www.google.com";
   db_name_t *name = db_parse_name(sn, strlen(sn), &code);
-  for (db_name_t *x = name, *y = res.name; x != 0 && y != 0; x = x->next, y = y->next) {
-      assert_string_equal(x->label.label, y->label.label);
+  for (db_name_t *x = name, *y = res.name; x != 0 && y != 0;
+       x = x->next, y = y->next) {
+    assert_string_equal(x->label.label, y->label.label);
   }
 
   char si[] = "1.2.3.4";
@@ -237,8 +232,9 @@ static void test_db_parse_next_record_2() {
 
   char sn[] = "@.localhost";
   db_name_t *name = db_parse_name(sn, strlen(sn), &code);
-  for (db_name_t *x = name, *y = res.name; x != 0 && y != 0; x = x->next, y = y->next) {
-      assert_string_equal(x->label.label, y->label.label);
+  for (db_name_t *x = name, *y = res.name; x != 0 && y != 0;
+       x = x->next, y = y->next) {
+    assert_string_equal(x->label.label, y->label.label);
   }
 
   char si[] = "172.24.32.1";
@@ -246,29 +242,27 @@ static void test_db_parse_next_record_2() {
   assert_int_equal(ip, res.ip);
 }
 
-int
-main(void) {
+int main(void) {
 
-    /**
-     * Insert here your test functions
-     */
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(null_test_success),
-        cmocka_unit_test(test_destroy_name_null_returnnull),
-        cmocka_unit_test(test_db_parse_name_correct1),
-        cmocka_unit_test(test_db_parse_name_correct_2),
-        cmocka_unit_test(test_db_parse_name_null),
-        cmocka_unit_test(test_db_parse_name_invalid),
-        cmocka_unit_test(test_db_parse_ip_correct),
-        cmocka_unit_test(test_db_parse_ip_invalid_end),
-        cmocka_unit_test(test_db_parse_ip_invalid_mid),
-        cmocka_unit_test(test_db_parse_ip_invalid_notdigit),
-        cmocka_unit_test(test_db_parse_ip_depth),
-        cmocka_unit_test(test_db_parse_next_record_1),
-        cmocka_unit_test(test_db_parse_next_record_2),
-    };
+  /**
+   * Insert here your test functions
+   */
+  const struct CMUnitTest tests[] = {
+      cmocka_unit_test(null_test_success),
+      cmocka_unit_test(test_destroy_name_null_returnnull),
+      cmocka_unit_test(test_db_parse_name_correct1),
+      cmocka_unit_test(test_db_parse_name_correct_2),
+      cmocka_unit_test(test_db_parse_name_null),
+      cmocka_unit_test(test_db_parse_name_invalid),
+      cmocka_unit_test(test_db_parse_ip_correct),
+      cmocka_unit_test(test_db_parse_ip_invalid_end),
+      cmocka_unit_test(test_db_parse_ip_invalid_mid),
+      cmocka_unit_test(test_db_parse_ip_invalid_notdigit),
+      cmocka_unit_test(test_db_parse_ip_depth),
+      cmocka_unit_test(test_db_parse_next_record_1),
+      cmocka_unit_test(test_db_parse_next_record_2),
+  };
 
-
-    /* Run the tests */
-    return cmocka_run_group_tests(tests, NULL, NULL);
+  /* Run the tests */
+  return cmocka_run_group_tests(tests, NULL, NULL);
 }

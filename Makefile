@@ -1,14 +1,3 @@
-#
-#
-#
-# Makefile template for C code
-#
-# Author: Gustavo Pantuza Coelho Pinto
-# Since: 24.03.2016
-#
-#
-#
-
 
 # Includes the project configurations
 include project.conf
@@ -50,6 +39,11 @@ END_COLOR=\$(COLOR_PREFIX)[0m
 # Source code directory structure
 BINDIR := bin
 SRCDIR := src
+UTILS := src/utils
+SERVER := src/dns-server
+CLIENT := src/dns-client
+POOL := src/dns-client/pools
+DB := src/database
 LOGDIR := log
 LIBDIR := lib
 TESTDIR := test
@@ -79,7 +73,7 @@ CFLAGS := -O3 $(STD) $(STACK) $(WARNS)
 DEBUG := -g3 -DDEBUG=1
 
 # Dependency libraries
-LIBS := # -lm  -I some/path/to/library
+LIBS := -luv# -lm  -I some/path/to/library
 
 # Test libraries
 TEST_LIBS := -l cmocka -L /usr/lib
@@ -92,7 +86,7 @@ TEST_BINARY := $(BINARY)_test_runner
 
 
 # %.o file names
-NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT))))
+NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT) $(POOL)/*.$(SRCEXT) $(CLIENT)/*.$(SRCEXT))))
 OBJECTS :=$(patsubst %,$(LIBDIR)/%.o,$(NAMES))
 
 
@@ -137,8 +131,27 @@ all: $(OBJECTS)
 # Rule for object binaries compilation
 $(LIBDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(CLIENT)
 
+$(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
+
+$(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB) -I $(CLIENT)
+
+$(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
+
+$(LIBDIR)/%.o: $(POOL)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(CLIENT)
+
+$(LIBDIR)/%.o: $(CLIENT)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(POOL)
 
 # Rule for run valgrind tool
 valgrind:
@@ -154,7 +167,7 @@ valgrind:
 # Compile tests and run the test binary
 tests:
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) $(TESTDIR)/main.c -o $(BINDIR)/$(TEST_BINARY) $(DEBUG) $(CFLAGS) $(LIBS) $(TEST_LIBS)
+	$(CC) $(TESTDIR)/main.c -o $(BINDIR)/$(TEST_BINARY) $(DEBUG) $(CFLAGS) $(LIBS) $(TEST_LIBS) -I $(SRCDIR)
 	@which ldconfig && ldconfig -C /tmp/ld.so.cache || true # caching the library linking
 	@echo -en "$(BROWN) Running tests: $(END_COLOR)";
 	./$(BINDIR)/$(TEST_BINARY)
