@@ -2,7 +2,7 @@
 #define DB_CACHE_H
 
 #include "type.h"
-#define DB_CACHE_INDEX_WIDTH 0x10
+#define DB_CACHE_INDEX_WIDTH 0x08
 #define DB_CACHE_ENTRY_NUM (0x1 << DB_CACHE_INDEX_WIDTH)
 #define DB_CACHE_WAY_NUM 0x2
 
@@ -24,6 +24,6 @@ db_record_t *db_cache_lookup(cache_t *c, db_name_t *key);
 
 void db_cache_free(cache_t *c);
 
-uint16_t hash_name(db_name_t *name);
+uint8_t hash_name(db_name_t *name);
 
 #endif

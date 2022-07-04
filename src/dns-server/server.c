@@ -63,12 +63,18 @@ static void on_cli_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
     udp_context_t *c = upool->pool[u_id];
     set_dns_id(buf->base, qpool->pool[c->query_id].dns_id);
 
+    uv_timer_t *timer = c->timer;
+    uv_timer_stop(timer);
+    free(timer->data);
+    free(timer);
+
     // send to client
     uv_udp_send_t *send_req = malloc(sizeof(uv_udp_send_t));
     uv_buf_t send_buf = uv_buf_init(buf->base, nread);
     uv_udp_send(send_req, srv_sock, &send_buf, 1,
                 &qpool->pool[c->query_id].addr, on_send);
     upool_finish(upool, u_id);
+    qpool_remove(qpool, c->query_id);
 
     free(buf->base);
   }
@@ -93,7 +99,19 @@ static db_name_t *db_name_from_dns_name(dn_name_t *dns_name, char *raw) {
   return name;
 }
 
-static void add_udp_req(struct sockaddr addr, char *req_data, size_t req_len) {
+static void on_udp_timeout(uv_timer_t *timer) {
+  log_warn("udp %d timeout, delete req", *(int *)timer->data);
+  int u_id = *(int *)timer->data;
+  uv_timer_stop(timer);
+  free(timer->data);
+  free(timer);
+  udp_context_t *c = upool->pool[u_id];
+  upool_finish(upool, u_id);
+  qpool_remove(qpool, c->query_id);
+}
+
+static void add_udp_req(struct sockaddr addr, char *req_data, size_t req_len,
+                        db_name_t *dn_name) {
   // check whether pool is full
   if (qpool_full(qpool)) {
     log_warn("ignore dns request due to full query pool.");
@@ -103,9 +121,18 @@ static void add_udp_req(struct sockaddr addr, char *req_data, size_t req_len) {
     log_warn("ignore dns request due to full udp req pool.");
     return;
   }
-  int q_id = qpool_insert(qpool, addr, req_data, req_len);
+  int q_id = qpool_insert(qpool, addr, req_data, req_len, dn_name);
   // get udp context id
   int u_id = upool_add(upool, q_id, qpool->pool + q_id);
+
+  uv_timer_t *timer = malloc(sizeof(uv_timer_t));
+  uv_timer_init(loop, timer);
+  int *p_uid = malloc(sizeof(int));
+  *p_uid = u_id;
+  timer->data = p_uid;
+  uv_timer_start(timer, on_udp_timeout, UDP_TIMEOUT, UDP_TIMEOUT);
+
+  upool->pool[u_id]->timer = timer;
 
   uv_udp_send_t *send_req = malloc(sizeof(uv_udp_send_t));
   uv_buf_t send_buf =
@@ -131,7 +158,7 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
     dns_msg_t parsed_msg;
     int ret_code = parse_dns_msg(buf->base, &parsed_msg);
     memcpy(parsed_msg.raw, buf->base, nread);
-    if (ret_code != DNS_MSG_PARSE_OK) {
+    if (ret_code != DNS_MSG_PARSE_OKAY) {
       log_error("Error parsing dns message");
     }
     log_info("DNS message id %d, qcount %d", parsed_msg.header.id,
@@ -141,6 +168,8 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
     printf("\n");
 
     int hit = 0;
+    db_name_t *name = 0;
+    db_record_t *rec = 0;
     if (parsed_msg.header.qd_cnt == 1 &&
         parsed_msg.question[0].type == DNS_QTYPE_A) {
       // hosts lookup
@@ -179,13 +208,12 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
           free(reply);
         }
       }
-      destroy_name(name);
     }
 
     // relay to dns server
     if (!hit) {
       log_info("request handler: raw server");
-      add_udp_req(*addr, buf->base, nread);
+      add_udp_req(*addr, buf->base, nread, name);
     }
 
     free(buf->base);
