@@ -3,7 +3,10 @@
 #include "client.h"
 #include "dns_parse.h"
 #include "log.h"
+#include "server_cache.h"
+#include "type.h"
 
+#include <ctype.h>
 #include <netinet/in.h>
 #include <uv.h>
 #include <uv/unix.h>
@@ -71,6 +74,25 @@ static void on_cli_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
   }
 }
 
+static db_name_t *db_name_from_dns_name(dn_name_t *dns_name, char *raw) {
+  db_name_t *name = 0;
+  for (size_t i = 0; i < dns_name->len; i++) {
+    db_name_t *u = malloc(sizeof(db_name_t));
+    u->label.len = dns_name->labels[i].len;
+    u->label.label = malloc(sizeof(char) * (u->label.len + 1));
+    memcpy(u->label.label, raw + dns_name->labels[i].offset, u->label.len);
+    // convert to lower case
+    for (size_t j = 0; j < u->label.len; j++) {
+      u->label.label[j] = tolower(u->label.label[j]);
+    }
+    u->label.label[u->label.len] = '\0';
+    u->next = name;
+    name = u;
+  }
+
+  return name;
+}
+
 static void add_udp_req(struct sockaddr addr, char *req_data, size_t req_len) {
   // check whether pool is full
   if (qpool_full(qpool)) {
@@ -119,6 +141,47 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
     printf("\n");
 
     int hit = 0;
+    if (parsed_msg.header.qd_cnt == 1 &&
+        parsed_msg.question[0].type == DNS_QTYPE_A) {
+      // hosts lookup
+      db_name_t *name =
+          db_name_from_dns_name(&parsed_msg.question[0].name, parsed_msg.raw);
+      db_record_t *rec = 0;
+      rec = db_cache_lookup(db_cache, name);
+      if (!rec) {
+        log_info("hosts cache miss");
+        rec = tree_lookup(db_tree, name);
+        if (rec) {
+          log_info("hosts cache refilled");
+          db_cache_insert(db_cache, name, rec);
+        }
+      } else {
+        log_info("hosts cache hit");
+      }
+      char *rr;
+      char *reply;
+      if (rec) {
+        log_info("request handler: hosts");
+        hit = 1;
+        if (!rec->ip) {
+          log_warn("Hit invalid address 0.0.0.0, ignore request");
+        } else {
+          // compose rr record
+          size_t rr_len;
+          rr = compose_a_rr(&parsed_msg.question[0].name, rec->ip, &rr_len);
+          size_t reply_len;
+          reply = compose_a_rr_ans(parsed_msg.raw, parsed_msg.msg_len, rr,
+                                   rr_len, &reply_len);
+          uv_udp_send_t *send_req = malloc(sizeof(uv_udp_send_t));
+          uv_buf_t send_buf = uv_buf_init(reply, reply_len);
+          uv_udp_send(send_req, srv_sock, &send_buf, 1, addr, on_send);
+          free(rr);
+          free(reply);
+        }
+      }
+      destroy_name(name);
+    }
+
     // relay to dns server
     if (!hit) {
       log_info("request handler: raw server");

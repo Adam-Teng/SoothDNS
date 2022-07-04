@@ -19,17 +19,17 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 
-#define DN_PARSE_LABEL_OK 0
+#define DN_PARSE_LABEL_OKAY 0
 #define DN_PARSE_LABEL_INVALID_LEN 1
 #define DN_PARSE_LABEL_EON 2
 
-#define DN_PARSE_NAME_OK 0
+#define DN_PARSE_NAME_OKAY 0
 #define DN_PARSE_NAME_INVALID 1
 
-#define DNS_MSG_PARSE_Q_OK 0
+#define DNS_MSG_PARSE_Q_OKAY 0
 #define DNS_MSG_PARSE_Q_INVALID 1
 
-#define DNS_MSG_PARSE_OK 0
+#define DNS_MSG_PARSE_OKAY 0
 #define DNS_MSG_PARSE_INVALID 1
 
 char *parse_header(char *msg, dns_msg_header_t *header);
@@ -47,6 +47,7 @@ char *compose_a_rr_ans(char *raw, size_t raw_len, char *a_rr, size_t rr_len,
 
 void print_qtype(uint16_t t);
 void print_qclass(uint16_t t);
+
 void print_question(const dns_msg_q_t *q, const char *raw_msg);
 
 #endif // !DNS_PARSE_H

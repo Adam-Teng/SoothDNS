@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-#include "server-cache.h"
+#include "server_cache.h"
 #include "cache.h"
 #include "io.h"
 #include "log.h"
