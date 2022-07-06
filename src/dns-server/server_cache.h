@@ -1,9 +1,9 @@
 #ifndef DNS_SERVER_CACHE_H
 #define DNS_SERVER_CACHE_H
 
+#include "../lru-cache/cache.h"
 #include "../lru-cache/lru.h"
 #include "args.h"
-#include "cache.h"
 #include "tree.h"
 
 extern tree_t *db_tree;
