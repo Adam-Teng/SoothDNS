@@ -44,7 +44,6 @@ void db_cache_insert(cache_t *c, db_name_t *key, db_record_t *val) {
   char sel = c->lru[idx];
   c->entries[sel][idx].key = dup_name(key);
   c->entries[sel][idx].rec = val;
-  // flip lru
   c->lru[idx] = sel == 0 ? 1 : 0;
 }
 

@@ -1244,17 +1244,17 @@ parameter_t *parameter_init() {
 }
 
 char *help() {
-  char *s =
-      "soothDNS: A simple dns relay.\n  "
-      "usage: You can add these options to display info or set the DNS.\n  "
-      "--help\n    Display helper info.\n "
-      "--version | -v\n    Display version info.\n  --server | -s STR\n    Raw "
-      "remote DNS server address (default 114.114.114.114).\n  "
-      "--max_query INT\n    Max concurrent query number(default 32).\n  "
-      "--max_udp_request INT\n    Max concurrent UDP request number (default "
-      "32).\n  "
-      "--client_port | -c INT\n    Client UDP socket port for raw DNS request "
-      "(default 2345).\n  "
-      "--host_path | -h STR\n    Path to hosts file.\n";
+  char *s = "soothDNS: A simple dns relay.\n"
+            "\n"
+            "usage: ./soothDNS [arguments].\n"
+            "\n"
+            "--help                   Display helper info.\n"
+            "--version | -v          Display version info.\n"
+            "--server | -s [str]      Set remote DNS server address.\n"
+            "--max_query [int]        Set max concurrent query number.\n"
+            "--max_udp_req [int]      Set max concurrent UDP request number.\n"
+            "--client_port | -c [int] Set client UDP socket port for raw "
+            "DNS request.\n"
+            "--host_path | -h [str]   Set path to hosts file.\n";
   return s;
 }

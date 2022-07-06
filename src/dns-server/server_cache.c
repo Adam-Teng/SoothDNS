@@ -1,17 +1,3 @@
-/*
- * ============================================================================
- *
- *       Filename:  server-cache.c
- *
- *    Description:  init the database and cache
- *
- *        Created:  06/28/2022
- *
- *         Author:  yhteng
- *
- * ============================================================================
- */
-
 #include "server_cache.h"
 #include "cache.h"
 #include "io.h"
