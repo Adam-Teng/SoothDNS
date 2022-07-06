@@ -50,8 +50,10 @@ char *parse_label(char *current, char *orig_msg, dn_label_t *label,
   char *ret = 0;
   if (((len >> 14) & 0x3) == 0x3) { // label pointer
     uint16_t offset = len & 0x3fff;
-    ret = current + 2;
-    parse_label(orig_msg + offset, orig_msg, label, ret_code);
+    ret = parse_label(orig_msg + offset, orig_msg, label, ret_code);
+    if (*ret_code == DN_PARSE_LABEL_OKAY) {
+      *ret_code = DN_PARSE_LABEL_OKAY_PTR;
+    }
   } else if (((len >> 14) & 0x3) == 0x0) {
     p = current + 1;
     len = (*(uint8_t *)current);
@@ -71,15 +73,35 @@ char *parse_label(char *current, char *orig_msg, dn_label_t *label,
   return ret;
 }
 
-char *parse_name(char *current, char *orig_msg, dn_name_t *name,
-                 int *ret_code) {
+char *parse_name(char *current, char *orig_msg, dn_label_t *label,
+                 dns_size_t *name_len, int *ret_code) {
   char *p = current;
+  char *q = 0;
   int pl_ret_code = DN_PARSE_LABEL_OKAY;
   int len = 0;
 
   while (pl_ret_code == DN_PARSE_LABEL_OKAY) {
-    p = parse_label(p, orig_msg, name->labels + len, &pl_ret_code);
+    char *new_p;
+    new_p = parse_label(p, orig_msg, label + len, &pl_ret_code);
     len = len + 1;
+    if (pl_ret_code != DN_PARSE_LABEL_OKAY_PTR) {
+      p = new_p;
+    } else {
+      p = p + 2;
+      q = new_p;
+    }
+  }
+
+  if (pl_ret_code == DN_PARSE_LABEL_OKAY_PTR) {
+    int pn_ret_code = DN_PARSE_NAME_OKAY;
+    dns_size_t ptr_len = 0;
+    parse_name(q, orig_msg, label + len, &ptr_len, &pn_ret_code);
+    if (pn_ret_code == DN_PARSE_NAME_INVALID) {
+      *ret_code = pn_ret_code;
+      return 0;
+    }
+    len += ptr_len;
+    len += 1;
   }
 
   if (pl_ret_code == DN_PARSE_LABEL_INVALID_LEN) {
@@ -88,7 +110,7 @@ char *parse_name(char *current, char *orig_msg, dn_name_t *name,
   }
   len = len - 1;
   *ret_code = DN_PARSE_NAME_OKAY;
-  name->len = len;
+  *name_len = len;
 
   return p;
 }
@@ -97,7 +119,7 @@ char *parse_question(char *current, char *orig_msg, dns_msg_q_t *q,
                      int *ret_code) {
   char *p = current;
   int pn_code = DN_PARSE_NAME_INVALID;
-  p = parse_name(p, orig_msg, &q->name, &pn_code);
+  p = parse_name(p, orig_msg, q->name.labels, &q->name.len, &pn_code);
   if (pn_code == DN_PARSE_NAME_INVALID) {
     *ret_code = DNS_MSG_PARSE_Q_INVALID;
     return 0;
@@ -122,12 +144,56 @@ int parse_dns_msg(char *msg, dns_msg_t *res) {
       return DNS_MSG_PARSE_INVALID;
     }
   }
+  for (dns_size_t i = 0; i < res->header.an_cnt; i++) {
+    int pr_code = DNS_MSG_PARSE_RR_OKAY;
+    p = parse_rr(p, msg, res->answer + i, &pr_code);
+    if (pr_code == DNS_MSG_PARSE_RR_INVALID) {
+      return DNS_MSG_PARSE_INVALID;
+    }
+  }
+  res->query_len = p - msg;
+  for (dns_size_t i = 0; i < res->header.ns_cnt; i++) {
+    int pr_code = DNS_MSG_PARSE_RR_OKAY;
+    p = parse_rr(p, msg, res->authority + i, &pr_code);
+    if (pr_code == DNS_MSG_PARSE_RR_INVALID) {
+      return DNS_MSG_PARSE_INVALID;
+    }
+  }
+  for (dns_size_t i = 0; i < res->header.ar_cnt; i++) {
+    int pr_code = DNS_MSG_PARSE_RR_OKAY;
+    p = parse_rr(p, msg, res->additional + i, &pr_code);
+    if (pr_code == DNS_MSG_PARSE_RR_INVALID) {
+      return DNS_MSG_PARSE_INVALID;
+    }
+  }
   res->msg_len = p - msg;
 
   return DNS_MSG_PARSE_OKAY;
 }
 
-char *compose_a_rr(dn_name_t *dn_name, int32_t ip, size_t *len) {
+char *parse_rr(char *current, char *orig_msg, dns_msg_rr_t *rr, int *ret_code) {
+  char *p = current;
+  int code = 0;
+  p = parse_name(p, orig_msg, rr->name.labels, &rr->name.len, &code);
+  if (code == DNS_MSG_PARSE_Q_INVALID) {
+    *ret_code = DNS_MSG_PARSE_RR_INVALID;
+    return 0;
+  }
+  rr->type = ntohs(*(uint16_t *)p);
+  p += 2;
+  rr->dclass = ntohs(*(uint16_t *)p);
+  p += 2;
+  rr->ttl = ntohl(*(uint32_t *)p);
+  p += 4;
+  rr->rdlength = ntohs(*(uint16_t *)p);
+  p += 2;
+  rr->data_offset = p - orig_msg;
+  p += rr->rdlength;
+  *ret_code = DNS_MSG_PARSE_RR_OKAY;
+  return p;
+}
+
+char *compose_a_rr(dn_name_t *dn_name, int32_t ip, uint32_t ttl, size_t *len) {
   char *rr = malloc(sizeof(char) * 16);
   assert(dn_name->len);
   *len = 16;
@@ -142,7 +208,7 @@ char *compose_a_rr(dn_name_t *dn_name, int32_t ip, size_t *len) {
   *(uint16_t *)p = htons(DNS_QCLASS_IN);
   // set ttl
   p += 2;
-  *(uint16_t *)p = htons(2700);
+  *(uint32_t *)p = htons(ttl);
   // set rd length
   p += 4;
   *(uint16_t *)p = htons(4);
@@ -168,6 +234,36 @@ char *compose_a_rr_ans(char *raw, size_t raw_len, char *a_rr, size_t rr_len,
   *(uint16_t *)(msg + 6) = htons(1);
   // clear additional count
   *(uint16_t *)(msg + 10) = htons(0);
+
+  return msg;
+}
+
+char *compose_header(dns_msg_header_t *header, size_t *msg_len) {
+  char *msg = malloc(12 * sizeof(char));
+  *msg_len = 12;
+  char *p = msg;
+
+  *(uint16_t *)p = htons(header->id);
+  p += 2;
+  *(uint8_t *)p = 0;
+  *(uint8_t *)p = (header->qr << 7) | (header->opcode << 3) |
+                  (header->aa << 2) | header->tc | header->rd;
+  p += 1;
+
+  *(uint8_t *)p = 0;
+  *(uint8_t *)p = (header->ra << 7) | header->rcode;
+  p += 1;
+
+  *(uint16_t *)p = htons(header->qd_cnt);
+  p += 2;
+
+  *(uint16_t *)p = htons(header->an_cnt);
+  p += 2;
+
+  *(uint16_t *)p = htons(header->ns_cnt);
+  p += 2;
+
+  *(uint16_t *)p = htons(header->ar_cnt);
 
   return msg;
 }
@@ -274,5 +370,60 @@ void print_question(const dns_msg_q_t *q, const char *raw_msg) {
       putchar(raw_msg[k]);
     }
     putchar('.');
+  }
+}
+
+void print_dns_domain_name(dn_name_t *name, char *orig_msg) {
+  for (int i = 0; i < name->len; i++) {
+    for (int j = 0; j < name->labels[i].len; j++) {
+      putchar(orig_msg[name->labels[i].offset + j]);
+    }
+    putchar('.');
+  }
+}
+
+void print_dns_header(dns_msg_header_t *header) {
+  printf("id %d, qr %d, opcode %d, aa %d, tc %d, rd %d, ra %d,"
+         " rcode %d, qdcount %d, ancount %d, nscount %d, arcount %d",
+         header->id, header->qr, header->opcode, header->aa, header->tc,
+         header->rd, header->ra, header->rcode, header->qd_cnt, header->an_cnt,
+         header->ns_cnt, header->ar_cnt);
+}
+
+void print_dns_question(dns_msg_q_t *q, char *orig_msg) {
+  printf("question ");
+  print_dns_domain_name(&q->name, orig_msg);
+  printf(" type %d, class %d", q->type, q->dclass);
+}
+
+void print_dns_rr(dns_msg_rr_t *rr, char *orig_msg) {
+  printf("rr ");
+  print_dns_domain_name(&rr->name, orig_msg);
+  printf(" type %d, ttl %d, rdlength %d", rr->type, rr->ttl, rr->rdlength);
+}
+
+void print_dns_msg(dns_msg_t *msg) {
+  puts("------- Header -------");
+  print_dns_header(&msg->header);
+  putchar('\n');
+  puts("------- Questions -------");
+  for (int i = 0; i < msg->header.qd_cnt; i++) {
+    print_dns_question(msg->question + i, msg->raw);
+    putchar('\n');
+  }
+  puts("------- Answer -------");
+  for (int i = 0; i < msg->header.an_cnt; i++) {
+    print_dns_rr(msg->answer + i, msg->raw);
+    putchar('\n');
+  }
+  puts("------- Authority -------");
+  for (int i = 0; i < msg->header.ns_cnt; i++) {
+    print_dns_rr(msg->authority + i, msg->raw);
+    putchar('\n');
+  }
+  puts("------- Additional -------");
+  for (int i = 0; i < msg->header.ar_cnt; i++) {
+    print_dns_rr(msg->additional + i, msg->raw);
+    putchar('\n');
   }
 }

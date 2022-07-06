@@ -1,1 +1,1 @@
-# dns-relay
+# soothDNS

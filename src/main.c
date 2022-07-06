@@ -44,33 +44,24 @@ int main(int argc, char *argv[]) {
   para->client_port = ap_int_value(parser, "client_port");
   para->host_path = ap_str_value(parser, "host_path");
 
-  log_info("dns relay started");
-
-  /* Print basic information */
-  log_info("remote server: %s", para->server_addr);
-  log_info("max query: %d", para->max_query);
-  log_info("max udp req: %d", para->max_udp_req);
-  log_info("client port: %d", para->client_port);
-  log_info("hosts file: %s", para->host_path);
+  log_info("soothDNS started");
 
   /* prints parser's state */
   ap_print(parser);
 
   /* init server */
   loop_init();
-  log_info("libuv event loop initialized");
   pools_init(para);
-  log_info("pools initialized");
   server_cache_init(para);
-  log_info("hosts initialized");
   socket_init(para);
-  log_info("udp socket initialized");
-  log_info("server initialized, listening at port 53");
+  log_info("server is listening at port 53");
 
   /* run server */
-  server_run();
+  int ret = server_run();
 
+  pools_deinit();
+  server_cache_deinit();
   /* Free the parser's memory */
   ap_free(parser);
-  return EXIT_SUCCESS;
+  return ret;
 }

@@ -44,6 +44,7 @@ SERVER := src/dns-server
 CLIENT := src/dns-client
 POOL := src/dns-client/pools
 DB := src/database
+LRU := src/lru-cache
 LOGDIR := log
 LIBDIR := lib
 TESTDIR := test
@@ -86,7 +87,7 @@ TEST_BINARY := $(BINARY)_test_runner
 
 
 # %.o file names
-NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT) $(POOL)/*.$(SRCEXT) $(CLIENT)/*.$(SRCEXT))))
+NAMES := $(notdir $(basename $(wildcard $(SRCDIR)/*.$(SRCEXT) $(UTILS)/*.$(SRCEXT) $(SERVER)/*.$(SRCEXT) $(DB)/*.$(SRCEXT) $(POOL)/*.$(SRCEXT) $(CLIENT)/*.$(SRCEXT) $(LRU)/*.$(SRCEXT))))
 OBJECTS :=$(patsubst %,$(LIBDIR)/%.o,$(NAMES))
 
 
@@ -137,13 +138,17 @@ $(LIBDIR)/%.o: $(UTILS)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
 	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR)
 
+$(LIBDIR)/%.o: $(LRU)/%.$(SRCEXT)
+	@echo -en "$(BROWN)CC $(END_COLOR)";
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB)
+
 $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(SRCDIR)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB) -I $(CLIENT)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB) -I $(CLIENT) -I $(LRU)
 
 $(LIBDIR)/%.o: $(POOL)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
