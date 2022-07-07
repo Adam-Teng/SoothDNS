@@ -11,7 +11,7 @@ db_record_t *readfile(char *path, int *count, int *ret_code) {
   handle = fopen(path, "rb");
   if (!handle) {
     log_error("cannot open hosts file\n");
-    log_fatal("db cache init error");
+    log_fatal("db init error");
     exit(-1);
   }
   fseek(handle, 0, SEEK_END);

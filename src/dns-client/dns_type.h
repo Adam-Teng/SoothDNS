@@ -1,16 +1,3 @@
-/*
- * ============================================================================
- *
- *       Filename:  dns_type.h
- *
- *    Description:  dns报文的类型
- *
- *        Created:  05/14/2022
- *
- *         Author:  yhteng
- *
- * ============================================================================
- */
 #ifndef DNS_TYPE_H
 #define DNS_TYPE_H
 
@@ -52,8 +39,7 @@
 
 typedef uint16_t dns_size_t;
 
-//头部解析
-struct dns_msg_header {
+typedef struct dns_msg_header {
   uint16_t id;
   uint8_t qr;
   uint8_t opcode;
@@ -66,44 +52,42 @@ struct dns_msg_header {
   dns_size_t an_cnt;
   dns_size_t ns_cnt;
   dns_size_t ar_cnt;
-};
-typedef struct dns_msg_header dns_msg_header_t;
+} dns_msg_header_t;
 
-//查询问题解析
-struct dn_label {
+typedef struct dn_label {
   dns_size_t len;
   dns_size_t offset;
-};
-typedef struct dn_label dn_label_t;
+} dn_label_t;
 
-struct dn_name {
+typedef struct dn_name {
   dn_label_t labels[DN_MAXLABEL];
   dns_size_t len;
-};
-typedef struct dn_name dn_name_t;
+} dn_name_t;
 
-struct dns_msg_q {
+typedef struct dns_msg_q {
   dn_name_t name;
   uint16_t type;
   uint16_t dclass;
-};
-typedef struct dns_msg_q dns_msg_q_t;
+} dns_msg_q_t;
 
-struct dns_msg_rr {
+typedef struct dns_msg_rr {
   dn_name_t name;
   uint16_t type;
   uint16_t dclass;
   uint16_t ttl;
   uint16_t rdlength;
   uint16_t data_offset;
-};
+} dns_msg_rr_t;
 
-struct dns_msg {
+typedef struct dns_msg {
   char raw[DNS_MSG_MAX_LEN];
   uint32_t msg_len;
+  uint32_t query_len;
   dns_msg_header_t header;
   dns_msg_q_t question[DNS_MSG_MAX_ENTRY];
-};
-typedef struct dns_msg dns_msg_t;
+  dns_msg_rr_t answer[DNS_MSG_MAX_ENTRY];
+  dns_msg_rr_t authority[DNS_MSG_MAX_ENTRY];
+  dns_msg_rr_t additional[DNS_MSG_MAX_ENTRY];
+} dns_msg_t;
 
 #endif // !DNS_TYPE_H
