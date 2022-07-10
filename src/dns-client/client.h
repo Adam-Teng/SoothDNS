@@ -8,8 +8,8 @@
 #include "pools/udp.h"
 
 extern qpool_t *qpool;
-extern udp_pool_t *upool;
 extern conn_pool_t *cpool;
+extern udp_pool_t *upool;
 
 void pools_init(parameter_t *para);
 

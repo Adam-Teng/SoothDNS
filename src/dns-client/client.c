@@ -4,6 +4,7 @@
 
 qpool_t *qpool = 0;
 udp_pool_t *upool = 0;
+conn_pool_t *cpool = 0;
 
 void pools_init(parameter_t *para) {
   qpool = qpool_init(para->max_query);

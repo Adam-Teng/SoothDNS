@@ -177,6 +177,11 @@ tests:
 	@echo -en "$(BROWN) Running tests: $(END_COLOR)";
 	./$(BINDIR)/$(TEST_BINARY)
 
+copy:
+	find . -name '*.h' -o -name '*.c' | xargs cat > $(LOGDIR)/report.md
+
+count:
+	find . -name '*.h' -o -name '*.c' | xargs wc -l
 
 # Rule for cleaning the project
 clean:

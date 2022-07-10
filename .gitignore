@@ -2,5 +2,3 @@ bin/*
 lib/*
 log/*
 !.gitkeep
-report.md
-copy.sh

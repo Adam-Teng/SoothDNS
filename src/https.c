@@ -1,9 +1,9 @@
 #include "https.h"
 #include "args.h"
 #include "client.h"
-#include "dns-client/dns_parse.h"
 #include "dns-server/server.h"
 #include "dns-server/server_cache.h"
+#include "dns_parse.h"
 #include "log.h"
 #include <ctype.h>
 
