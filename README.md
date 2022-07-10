@@ -1,1 +1,3 @@
-# dns-relay
+# soothDNS
+
+go version
