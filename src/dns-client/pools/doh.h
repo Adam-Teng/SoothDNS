@@ -27,7 +27,7 @@ typedef struct {
   uint16_t next_dns_id;
 } conn_pool_t;
 
-conn_pool_t *cpool_init(size_t size, char *doh_server);
+conn_pool_t *cpool_init(char *doh_server);
 
 int cpool_full(conn_pool_t *pool);
 

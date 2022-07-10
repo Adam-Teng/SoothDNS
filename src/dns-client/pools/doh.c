@@ -26,19 +26,19 @@ conn_context_t *make_ctxt(char *doh_server) {
   return c;
 }
 
-conn_pool_t *cpool_init(size_t size, char *doh_server) {
+conn_pool_t *cpool_init(char *doh_server) {
   conn_pool_t *pool = malloc(sizeof(conn_pool_t));
-  pool->pool_size = size;
+  pool->pool_size = 32;
   // init queue
   sc_queue_init(&pool->queue);
-  for (size_t i = 0; i < size; i++) {
+  for (size_t i = 0; i < 32; i++) {
     sc_queue_add_last(&pool->queue, i);
   }
   // init dns id
   pool->next_dns_id = time(0);
   // setup handles
-  pool->pool = malloc(size * sizeof(void *));
-  for (int i = 0; i < size; i++) {
+  pool->pool = malloc(32 * sizeof(void *));
+  for (int i = 0; i < 32; i++) {
     pool->pool[i] = make_ctxt(doh_server);
     pool->pool[i]->conn_id = i;
   }

@@ -203,6 +203,7 @@ struct parameter {
   int max_udp_req;
   int client_port;
   char *host_path;
+  char *doh_server;
 };
 
 /* Exports parameter as a global type */

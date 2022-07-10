@@ -3,11 +3,13 @@
 
 #include "args.h"
 #include "log.h"
+#include "pools/doh.h"
 #include "pools/query.h"
 #include "pools/udp.h"
 
 extern qpool_t *qpool;
 extern udp_pool_t *upool;
+extern conn_pool_t *cpool;
 
 void pools_init(parameter_t *para);
 
