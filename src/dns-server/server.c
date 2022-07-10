@@ -260,7 +260,7 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
           db_name_from_dns_name(&parsed_msg.question[0].name, parsed_msg.raw);
       lru_cache_node_t *cache_rec = lc_lookup(db_lru_cache, name);
       if (cache_rec) {
-        log_info("request handler: local resp cache");
+        log_info("request handler: local response cache");
         char *rr;
         char *reply;
         hit = 1;

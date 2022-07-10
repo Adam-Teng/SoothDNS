@@ -403,25 +403,25 @@ void print_dns_rr(dns_msg_rr_t *rr, char *orig_msg) {
 }
 
 void print_dns_msg(dns_msg_t *msg) {
-  puts("*** Header ***");
+  puts("****** Header ******");
   print_dns_header(&msg->header);
   putchar('\n');
-  puts("*** Questions ***");
+  puts("****** Questions ******");
   for (int i = 0; i < msg->header.qd_cnt; i++) {
     print_dns_question(msg->question + i, msg->raw);
     putchar('\n');
   }
-  puts("*** Answer ***");
+  puts("****** Answer ******");
   for (int i = 0; i < msg->header.an_cnt; i++) {
     print_dns_rr(msg->answer + i, msg->raw);
     putchar('\n');
   }
-  puts("*** Authority ***");
+  puts("****** Authority ******");
   for (int i = 0; i < msg->header.ns_cnt; i++) {
     print_dns_rr(msg->authority + i, msg->raw);
     putchar('\n');
   }
-  puts("*** Additional ***");
+  puts("****** Additional ******");
   for (int i = 0; i < msg->header.ar_cnt; i++) {
     print_dns_rr(msg->additional + i, msg->raw);
     putchar('\n');
