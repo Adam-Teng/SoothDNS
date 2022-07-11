@@ -99,12 +99,11 @@ default: all
 
 # Help message
 help:
-	@echo "C Project Template"
+	@echo "make help infomation"
 	@echo
 	@echo "Target rules:"
 	@echo "    all      - Compiles and generates binary file"
 	@echo "    tests    - Compiles with cmocka and run tests binary file"
-	@echo "    start    - Starts a new project using C project template"
 	@echo "    valgrind - Runs binary file using valgrind tool"
 	@echo "    clean    - Clean the project by removing binaries"
 	@echo "    help     - Prints a help message with target rules"
@@ -148,7 +147,7 @@ $(LIBDIR)/%.o: $(DB)/%.$(SRCEXT)
 
 $(LIBDIR)/%.o: $(SERVER)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";
-	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(UTILS) -I $(DB) -I $(CLIENT) -I $(LRU)
+	$(CC) -c $^ -o $@ $(DEBUG) $(CFLAGS) $(LIBS) -I $(SRCDIR) -I $(UTILS) -I $(DB) -I $(CLIENT) -I $(LRU)
 
 $(LIBDIR)/%.o: $(POOL)/%.$(SRCEXT)
 	@echo -en "$(BROWN)CC $(END_COLOR)";

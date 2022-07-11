@@ -2,6 +2,7 @@
 #include "args.h"
 #include "client.h"
 #include "dns_parse.h"
+#include "https.h"
 #include "log.h"
 #include "lru.h"
 #include "server_cache.h"
@@ -18,6 +19,8 @@ uv_udp_t *srv_sock = 0;
 uv_udp_t *cli_sock = 0;
 
 static struct sockaddr remote_addr;
+
+static parameter_t *para;
 
 static void alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                          uv_buf_t *buf) {
@@ -285,7 +288,10 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
     }
 
     // relay to dns server
-    if (!hit) {
+    if (!hit && para->doh_proxy) {
+      log_info("request handler: doh server %s", para->doh_server);
+      add_doh_connection(*addr, buf->base, nread, name);
+    } else if (!hit) {
       log_info("request handler: raw server");
       add_udp_req(*addr, buf->base, nread, name);
     }
@@ -296,9 +302,10 @@ static void on_srv_read(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf,
 
 void loop_init() { loop = uv_default_loop(); }
 
-void socket_init(parameter_t *para) {
+void socket_init(parameter_t *paras) {
   srv_sock = malloc(sizeof(uv_udp_t));
   cli_sock = malloc(sizeof(uv_udp_t));
+  para = paras;
 
   struct sockaddr_in srv_addr;
   struct sockaddr_in cli_addr;

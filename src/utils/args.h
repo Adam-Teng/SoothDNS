@@ -204,6 +204,7 @@ struct parameter {
   int client_port;
   char *host_path;
   char *doh_server;
+  int doh_proxy;
 };
 
 /* Exports parameter as a global type */

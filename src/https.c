@@ -282,3 +282,7 @@ void curl_init() {
 }
 
 void curl_deinit() { curl_multi_cleanup(curl_handle); }
+
+void https_init() { curl_init(); }
+
+void https_deinit() { curl_deinit(); }

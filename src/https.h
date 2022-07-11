@@ -11,6 +11,10 @@
 void add_doh_connection(struct sockaddr addr, char *req_data, size_t req_len,
                         db_name_t *name);
 
+void https_init();
+
+void https_deinit();
+
 void curl_init();
 
 void curl_deinit();

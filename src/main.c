@@ -4,6 +4,7 @@
 #include "dns-client/client.h"
 #include "dns-server/server.h"
 #include "dns-server/server_cache.h"
+#include "https.h"
 #include "utils/args.h"
 #include "utils/log.h"
 
@@ -31,6 +32,8 @@ int main(int argc, char *argv[]) {
   ap_int_opt(parser, "client_port c", 2345);
   ap_str_opt(parser, "host_path h",
              "/mnt/e/school/network/dns-relay/hosts.txt");
+  ap_int_opt(parser, "doh_proxy p", 0);
+  ap_str_opt(parser, "doh_server d", "cloudflare-dns.com");
 
   /* Parse the command line arguments. */
   if (!ap_parse(parser, argc, argv)) {
@@ -43,8 +46,15 @@ int main(int argc, char *argv[]) {
   para->max_udp_req = ap_int_value(parser, "max_udp_req");
   para->client_port = ap_int_value(parser, "client_port");
   para->host_path = ap_str_value(parser, "host_path");
+  para->doh_server = ap_str_value(parser, "d");
+  para->doh_proxy = ap_int_value(parser, "p");
 
   log_info("soothDNS started");
+  if (para->doh_proxy) {
+    log_info("starting as doh proxy, remote server: %s", para->doh_server);
+  } else {
+    log_info("starting as udp proxy, remote server: %s", para->server_addr);
+  }
 
   /* prints parser's state */
   ap_print(parser);
@@ -54,6 +64,7 @@ int main(int argc, char *argv[]) {
   pools_init(para);
   server_cache_init(para);
   socket_init(para);
+  https_init();
   log_info("server is listening at port 53");
 
   /* run server */
@@ -61,6 +72,7 @@ int main(int argc, char *argv[]) {
 
   pools_deinit();
   server_cache_deinit();
+  https_deinit();
   /* Free the parser's memory */
   ap_free(parser);
   return ret;
