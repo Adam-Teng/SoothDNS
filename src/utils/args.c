@@ -1256,6 +1256,8 @@ char *help() {
       "--max_query N            Set max concurrent query number to N.\n"
       "--max_udp N              Set max concurrent UDP request number to N.\n"
       "--client_port | -c N     Set client UDP socket port to N.\n"
-      "--host_path | -h <str>   Set path as <str> to hosts file.\n";
+      "--host_path | -h <str>   Set path as <str> to hosts file.\n"
+      "--doh_proxy | -p N       If N is not 0, enable doh proxy.\n"
+      "--doh_server | -d <str>  Set remote DoH server address to <str>.\n";
   return s;
 }
