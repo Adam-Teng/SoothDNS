@@ -1,6 +1,6 @@
 # soothDNS
 
-A simple Domain Name Relay Server 
+A simple Domain Name Relay Server writing in pure C
 
 ## Features
 
