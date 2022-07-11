@@ -11,4 +11,4 @@ A simple Domain Name Relay Server
 ## Usage
 
 - `make help`
-- if you compile it in windows, please config the related lib and remove the valgrind and test part in `Makefile`
+- if you compile it in windows, please config the related lib and remove the valgrind and test part in `Makefile` or using WSL
