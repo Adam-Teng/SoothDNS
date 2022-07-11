@@ -2,6 +2,8 @@
 
 A simple Domain Name Relay Server writing in pure C
 
+Pure go version is in another branch
+
 ## Features
 
 - DNS over HTTPS support
