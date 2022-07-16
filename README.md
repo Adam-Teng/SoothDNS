@@ -11,4 +11,4 @@ A simple Domain Name Relay Server writing in pure C
 ## Usage
 
 - `make help`
-- if you compile it in windows, please config the related lib and remove the valgrind and test part in `Makefile` or using WSL
+- if you compile it in windows, please config the related lib and remove the valgrind and test part in `Makefile`, or using WSL
